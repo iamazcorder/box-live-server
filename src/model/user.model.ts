@@ -85,6 +85,18 @@ const model = sequelize.define<UserModel>(
     token: {
       type: DataTypes.TEXT,
     },
+    background_image: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+    gender: {
+      type: DataTypes.ENUM('male', 'female', 'other'),
+      defaultValue: 'other',
+    },
+    birth_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+    },
   },
   {
     hooks: {

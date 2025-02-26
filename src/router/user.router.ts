@@ -33,12 +33,12 @@ userRouter.get('/get_user_info', userController.getUserInfo);
 userRouter.get('/find/:id', userController.find);
 
 // 更新用户
-userRouter.put(
-  '/update/:id',
-  verifyProp,
-  apiVerifyAuth([DEFAULT_AUTH_INFO.USER_MANAGE.auth_value]),
-  userController.update
-);
+// userRouter.put(
+//   '/update/:id',
+//   verifyProp,
+//   apiVerifyAuth([DEFAULT_AUTH_INFO.USER_MANAGE.auth_value]),
+//   userController.update
+// );
 
 // 修改密码
 userRouter.put('/update_pwd', userController.updatePwd);
@@ -50,5 +50,11 @@ userRouter.put(
   apiVerifyAuth([DEFAULT_AUTH_INFO.USER_MANAGE.auth_value]),
   userController.updateUserRole
 );
+
+// 上传头像
+userRouter.post('/upload_avatar', userController.uploadAvatar);
+
+// 更新用户信息
+userRouter.put('/update', userController.updateUserInfo);
 
 export default userRouter;

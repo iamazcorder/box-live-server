@@ -38,10 +38,22 @@ const msg = (flag: boolean) =>
 
 const sequelize = newSequelize(dbName);
 
+// async function createDb() {
+//   const initSequelize = newSequelize();
+//   await initSequelize.query(
+//     `CREATE DATABASE ${dbName} CHARACTER SET = 'utf8mb4';`,
+//     { logging: false }
+//   );
+//   console.log(chalkSUCCESS(`新建${dbName}数据库成功！`));
+//   await initDb('alert', sequelize);
+//   await initSequelize.close();
+// }
+
 async function createDb() {
   const initSequelize = newSequelize();
+  // 使用反引号包裹 dbName
   await initSequelize.query(
-    `CREATE DATABASE ${dbName} CHARACTER SET = 'utf8mb4';`,
+    `CREATE DATABASE \`${dbName}\` CHARACTER SET = 'utf8mb4';`,
     { logging: false }
   );
   console.log(chalkSUCCESS(`新建${dbName}数据库成功！`));

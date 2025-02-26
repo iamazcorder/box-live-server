@@ -1,9 +1,14 @@
 import { deleteUseLessObjectKey } from 'billd-utils';
-import { Op, literal, where } from 'sequelize';
+import { literal, Op, where } from 'sequelize';
 
-import { LIVE_ROOM_MODEL_EXCLUDE, THIRD_PLATFORM } from '@/constant';
+import {
+  COMMON_HTTP_CODE,
+  LIVE_ROOM_MODEL_EXCLUDE,
+  THIRD_PLATFORM,
+} from '@/constant';
 import { IList } from '@/interface';
 import areaModel from '@/model/area.model';
+import { CustomError } from '@/model/customError.model';
 import liveRoomModel from '@/model/liveRoom.model';
 import qqUserModel from '@/model/qqUser.model';
 import roleModel from '@/model/role.model';
@@ -294,6 +299,44 @@ class UserService {
       limit: 1,
       individualHooks: true,
     });
+    return result;
+  }
+
+  /** 更新用户头像 */
+  async updateAvatar(id: number, avatarUrl: string) {
+    const result = await userModel.update(
+      { avatar: avatarUrl },
+      { where: { id }, limit: 1 }
+    );
+    return result;
+  }
+
+  /** 更新用户信息 */
+  async updateUserInfo({ id, username, desc, gender, birth_date }: IUser) {
+    // 检查是否有其他用户使用相同的用户名
+    const existingUser = await userModel.findOne({
+      where: {
+        username,
+        id: {
+          [Op.ne]: id, // 确保排除自己
+        },
+      },
+    });
+
+    if (existingUser) {
+      throw new CustomError(
+        `用户名 "${username}" 已被其他用户占用，请选择其他用户名！`,
+        COMMON_HTTP_CODE.paramsError,
+        COMMON_HTTP_CODE.paramsError
+      );
+    }
+
+    // 更新用户信息
+    const result = await userModel.update(
+      { username, desc, gender, birth_date },
+      { where: { id }, limit: 1 }
+    );
+
     return result;
   }
 }

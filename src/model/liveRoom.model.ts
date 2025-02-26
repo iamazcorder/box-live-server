@@ -67,6 +67,20 @@ const model = sequelize.define<LiveRoomModel>(
       type: DataTypes.STRING(200),
       defaultValue: '',
     },
+    parent_category_id: {
+      type: DataTypes.INTEGER,
+    },
+    child_category_id: {
+      type: DataTypes.INTEGER,
+    },
+    live_announcement: {
+      type: DataTypes.STRING(255),
+      defaultValue: '',
+    },
+    personal_intro: {
+      type: DataTypes.TEXT,
+      defaultValue: '',
+    },
     pull_rtmp_url: {
       type: DataTypes.STRING(200),
       defaultValue: '',

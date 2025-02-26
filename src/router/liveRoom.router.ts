@@ -24,4 +24,7 @@ liveRoomRouter.put(
 
 liveRoomRouter.put('/update_my_live_room', liveRoomController.updateMyLiveRoom);
 
+// 上传封面
+liveRoomRouter.post('/upload_cover', liveRoomController.uploadCover);
+
 export default liveRoomRouter;

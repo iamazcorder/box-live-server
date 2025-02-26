@@ -117,7 +117,10 @@ class LiveService {
     rangTimeStart,
     rangTimeEnd,
   }: IList<ILive & ILiveRoom>) {
+    // 获取分页信息，返回limit和offset
     const { offset, limit } = handlePage({ nowPage, pageSize });
+
+    // 删除无用的字段，形成查询条件allWhere
     const allWhere: any = deleteUseLessObjectKey({
       id,
       live_record_id,
@@ -128,57 +131,63 @@ class LiveService {
       stream_id,
       remark,
     });
+
+    // 处理关键字搜索，搜索流名称、流ID和备注字段
     const keyWordWhere = handleKeyWord({
       keyWord,
       arr: ['stream_name', 'stream_id', 'remark'],
     });
+
+    // 如果关键字条件存在，则使用 OR 来进行模糊查询
     if (keyWordWhere) {
       allWhere[Op.or] = keyWordWhere;
     }
+
+    // 处理时间范围过滤条件
     const rangTimeWhere = handleRangTime({
       rangTimeType,
       rangTimeStart,
       rangTimeEnd,
     });
+    // 如果存在时间范围过滤条件，加入查询条件
     if (rangTimeWhere) {
       allWhere[rangTimeType!] = rangTimeWhere;
     }
+
+    // 获取排序规则
     const orderRes = handleOrder({ orderName, orderBy });
+
+    // 获取子排序规则（用于直播房间的排序）
     const childOrderRes = handleOrder(
       { orderName: childOrderName, orderBy: childOrderBy },
       liveRoomModel
     );
+
+    // 使用Sequelize的findAndCountAll方法查询数据，并返回分页结果
     const result = await liveModel.findAndCountAll({
       include: [
         {
-          model: liveRoomModel,
+          model: liveRoomModel, // 包含liveRoomModel模型
           attributes: {
-            exclude: LIVE_ROOM_MODEL_EXCLUDE,
+            exclude: LIVE_ROOM_MODEL_EXCLUDE, // 排除一些不必要的字段
           },
-          // where: {
-          //   ...subWhere,
-          // },
         },
         {
-          model: userModel,
+          model: userModel, // 包含userModel模型
           attributes: {
-            exclude: ['password', 'token'],
+            exclude: ['password', 'token'], // 排除敏感字段
           },
-          // through: {
-          //   attributes: [],
-          // },
         },
       ],
-      // 不能设置attributes: [],否则orderRes排序的时候，没有order字段就会报错
-      // attributes: ['created_at'],
-      // attributes: [],
-      order: [...orderRes, ...childOrderRes],
-      limit,
-      offset,
+      order: [...orderRes, ...childOrderRes], // 排序字段
+      limit, // 分页限制
+      offset, // 分页偏移量
       where: {
-        ...allWhere,
+        ...allWhere, // 查询条件，包括所有的过滤条件
       },
     });
+
+    // 返回分页结果
     return handlePaging<ILive>(result, nowPage, pageSize);
   }
 

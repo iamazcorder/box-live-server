@@ -16,12 +16,21 @@ import { CustomError } from '@/model/customError.model';
 import { loadAllRoutes } from '@/router';
 import { countdown } from '@/utils';
 import { pushToBilibili } from '@/utils/process';
+const serve = require('koa-static');
+const path = require('path');
 
 export async function setupKoa({ port }) {
   const app = new Koa();
   // app.proxyIpHeader 代理 ip 消息头, 默认为 X-Forwarded-For
   // app.proxyIpHeader = 'X-Real-IP';
   app.proxy = true;
+
+  // 让 Koa 提供 public 目录的静态文件服务
+  app.use(serve(path.join(__dirname, 'public')));
+
+  app.listen(8080, () => {
+    console.log('Server running at http://localhost:8080');
+  });
 
   app.use(catchErrorMiddle); // 全局错误处理
   app.use(

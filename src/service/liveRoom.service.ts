@@ -293,6 +293,15 @@ class LiveRoomService {
     return result;
   }
 
+  /** 更新直播间封面 */
+  async updateCover(id: number, coverUrl: string) {
+    const result = await liveRoomModel.update(
+      { cover_img: coverUrl },
+      { where: { id }, limit: 1 }
+    );
+    return result;
+  }
+
   /** 删除直播间 */
   async delete(id: number) {
     const result = await liveRoomModel.destroy({

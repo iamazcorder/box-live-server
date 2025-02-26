@@ -766,3 +766,12 @@ export interface ILiveView {
   updated_at?: string;
   deleted_at?: string;
 }
+
+export interface ICategory {
+  id?: number;
+  name?: string;
+  parent_id?: number | null;
+  level?: number;
+  created_at?: Date;
+  updated_at?: Date;
+}

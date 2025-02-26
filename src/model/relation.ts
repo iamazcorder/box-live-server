@@ -6,6 +6,8 @@ import LiveModel from '@/model/live.model';
 import LiveRecordModel from '@/model/liveRecord.model';
 import LiveRoomModel from '@/model/liveRoom.model';
 import LiveViewModel from '@/model/liveView.model';
+import liveRoomAppointmentsModel from '@/model/live_room_appointments.model';
+import liveRoomPreviewsModel from '@/model/live_room_previews.model';
 import LogModel from '@/model/log.model';
 import LoginRecordModel from '@/model/loginRecord.model';
 import OrderModel from '@/model/order.model';
@@ -311,4 +313,24 @@ UserModel.belongsToMany(RoleModel, {
     model: UserRoleModel,
     unique: false, // 不生成唯一索引
   },
+});
+
+liveRoomAppointmentsModel.belongsTo(liveRoomPreviewsModel, {
+  foreignKey: 'preview_id', // 外键是 preview_id
+  as: 'preview', // 给关联起一个别名 'preview'
+});
+liveRoomPreviewsModel.hasMany(liveRoomAppointmentsModel, {
+  foreignKey: 'preview_id',
+  as: 'appointments', // 给反向关联起一个别名 'appointments'
+});
+
+// 在 liveRoomPreviewModel 中定义关联
+liveRoomPreviewsModel.belongsTo(UserModel, {
+  foreignKey: 'user_id', // 关联的外键
+  as: 'user', // 设置别名
+});
+// 在 userModel 中定义关联
+UserModel.hasMany(liveRoomPreviewsModel, {
+  foreignKey: 'user_id', // 关联的外键
+  as: 'previews', // 设置别名
 });
