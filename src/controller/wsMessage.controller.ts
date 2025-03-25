@@ -9,9 +9,12 @@ import wsMessageService from '@/service/wsMessage.service';
 
 class WsMessageController {
   common = {
+    // 根据id查找消息
     find: (id: number) => wsMessageService.find(id),
+    // 根据直播记录id获取消息数
     getCountByLiveRecordId: (live_record_id: number) =>
       wsMessageService.getCountByLiveRecordId(live_record_id),
+    // 创建消息
     create: ({
       live_record_id,
       username,
@@ -52,6 +55,7 @@ class WsMessageController {
         remark,
       });
     },
+    // 更新消息
     update: ({
       id,
       live_record_id,
@@ -86,8 +90,10 @@ class WsMessageController {
         is_show,
         remark,
       }),
+    // 更新消息的显示状态
     updateIsShow: ({ id, is_show }: IWsMessage) =>
       wsMessageService.update({ id, is_show }),
+    // 获取消息列表，并使用Redis缓存优化性能
     getList: async ({
       id,
       live_record_id,
@@ -114,16 +120,20 @@ class WsMessageController {
       rangTimeEnd,
     }: IList<IWsMessage>) => {
       try {
+        // 尝试从Redis缓存中获取历史消息
         const oldCache = await redisController.getVal({
           prefix: REDIS_PREFIX.dbLiveRoomHistoryMsgList,
           key: `${live_room_id!}`,
         });
         if (oldCache) {
+          // 如果缓存存在，直接返回缓存数据
           return JSON.parse(oldCache).value;
         }
       } catch (error) {
+        // 如果Redis操作失败，打印错误
         console.log(error);
       }
+      // 如果缓存没有命中，从数据库获取数据
       const result = await wsMessageService.getList({
         id,
         live_record_id,
@@ -150,6 +160,7 @@ class WsMessageController {
         rangTimeEnd,
       });
       try {
+        // 将获取到的结果缓存到Redis，设置过期时间为3秒
         redisController.setExVal({
           prefix: REDIS_PREFIX.dbLiveRoomHistoryMsgList,
           key: `${live_room_id!}`,
@@ -157,6 +168,7 @@ class WsMessageController {
           exp: 3,
         });
       } catch (error) {
+        // 缓存操作失败，打印错误
         console.log(error);
       }
       return result;

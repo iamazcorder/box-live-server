@@ -73,10 +73,10 @@ class UserController {
     }
 
     const createUserInfo = await this.common.create(data);
-    if (user_roles) {
-      // @ts-ignore
-      await createUserInfo.setRoles(user_roles);
-    }
+    // if (user_roles) {
+    //   // @ts-ignore
+    //   await createUserInfo.setRoles(user_roles);
+    // }
     await walletService.create({ user_id: createUserInfo.id, balance: 0 });
     await thirdUserService.create({
       user_id: createUserInfo.id,

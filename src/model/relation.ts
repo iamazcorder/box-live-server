@@ -1,6 +1,7 @@
 import AreaModel from '@/model/area.model';
 import AreaLiveRoomModel from '@/model/areaLiveRoom.model';
 import AuthModel from '@/model/auth.model';
+import CategoryModel from '@/model/categories.model';
 import GlobalMsgModel from '@/model/globalMsg.model';
 import LiveModel from '@/model/live.model';
 import LiveRecordModel from '@/model/liveRecord.model';
@@ -8,6 +9,7 @@ import LiveRoomModel from '@/model/liveRoom.model';
 import LiveViewModel from '@/model/liveView.model';
 import liveRoomAppointmentsModel from '@/model/live_room_appointments.model';
 import liveRoomPreviewsModel from '@/model/live_room_previews.model';
+import LiveRoomRecordingModel from '@/model/live_room_recordings.model';
 import LogModel from '@/model/log.model';
 import LoginRecordModel from '@/model/loginRecord.model';
 import OrderModel from '@/model/order.model';
@@ -20,6 +22,9 @@ import ThirdUserModel from '@/model/thirdUser.model';
 import UserModel from '@/model/user.model';
 import UserLiveRoomModel from '@/model/userLiveRoom.model';
 import UserRoleModel from '@/model/userRole.model';
+import UserLiveViewsModel from '@/model/user_live_views.model';
+import userVideosModel from '@/model/user_videos.model';
+import UserVideoViewsModel from '@/model/user_video_views.model';
 import WalletModel from '@/model/wallet.model';
 import WechatUserModel from '@/model/wechatUser.model';
 import WsMessageModel from '@/model/wsMessage.model';
@@ -333,4 +338,97 @@ liveRoomPreviewsModel.belongsTo(UserModel, {
 UserModel.hasMany(liveRoomPreviewsModel, {
   foreignKey: 'user_id', // 关联的外键
   as: 'previews', // 设置别名
+});
+LiveRoomModel.hasMany(LiveRoomRecordingModel, {
+  foreignKey: 'live_room_id',
+  as: 'recordings', // 别名
+});
+
+LiveRoomRecordingModel.belongsTo(LiveRoomModel, {
+  foreignKey: 'live_room_id',
+  as: 'liveRoom', // 这里的 as 必须与查询时的 model 名一致
+});
+// **1️⃣ 直播回放属于一个父级分类**
+LiveRoomRecordingModel.belongsTo(CategoryModel, {
+  foreignKey: 'parent_category_id',
+  as: 'parentCategory',
+});
+
+// **2️⃣ 直播回放属于一个子级分类**
+LiveRoomRecordingModel.belongsTo(CategoryModel, {
+  foreignKey: 'child_category_id',
+  as: 'childCategory',
+});
+
+// **3️⃣ 分类可以包含多个直播回放**
+CategoryModel.hasMany(LiveRoomRecordingModel, {
+  foreignKey: 'parent_category_id',
+  as: 'parentRecordings',
+});
+
+CategoryModel.hasMany(LiveRoomRecordingModel, {
+  foreignKey: 'child_category_id',
+  as: 'childRecordings',
+});
+
+// 添加关联（一个用户可以有多个视频）
+UserModel.hasMany(userVideosModel, { foreignKey: 'user_id', as: 'videos' });
+userVideosModel.belongsTo(UserModel, { foreignKey: 'user_id', as: 'user' });
+
+// 关联 LiveRoom
+userVideosModel.belongsTo(LiveRoomModel, {
+  foreignKey: 'live_room_id',
+  as: 'liveRoom',
+});
+
+// 关联 Categories
+userVideosModel.belongsTo(CategoryModel, {
+  foreignKey: 'parent_category_id',
+  as: 'parentCategory',
+});
+userVideosModel.belongsTo(CategoryModel, {
+  foreignKey: 'child_category_id',
+  as: 'childCategory',
+});
+
+UserModel.hasMany(UserVideoViewsModel, {
+  foreignKey: 'user_id',
+  as: 'videoViews', // 关联名，之后 include 查询要用
+});
+
+UserVideoViewsModel.belongsTo(UserModel, {
+  foreignKey: 'user_id',
+  as: 'user',
+});
+
+// `user_videos` 关联 `user_video_views`
+userVideosModel.hasMany(UserVideoViewsModel, {
+  foreignKey: 'video_id',
+  as: 'videoViews', // 之后 `include` 查询时用这个名字
+});
+
+UserVideoViewsModel.belongsTo(userVideosModel, {
+  foreignKey: 'video_id',
+  as: 'video',
+});
+
+UserLiveViewsModel.belongsTo(UserModel, {
+  foreignKey: 'user_id',
+  as: 'user', // **确保别名与 service 里 include 里的 as 一致**
+});
+
+UserLiveViewsModel.belongsTo(LiveRoomModel, {
+  foreignKey: 'live_room_id',
+  as: 'liveRoom',
+});
+
+// **建立 liveRoomModel 和 categoriesModel 的关联**
+LiveRoomModel.belongsTo(CategoryModel, {
+  foreignKey: 'parent_category_id',
+  as: 'parentCategory',
+});
+
+LiveRoomModel.belongsTo(CategoryModel, {
+  foreignKey: 'child_category_id',
+  as: 'childCategory',
 });

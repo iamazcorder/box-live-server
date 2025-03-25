@@ -1,6 +1,7 @@
 import { deleteUseLessObjectKey, filterObj } from 'billd-utils';
 import { Op } from 'sequelize';
 
+import sequelize from '@/config/mysql';
 import { LIVE_ROOM_MODEL_EXCLUDE } from '@/constant';
 import { IList, IUserLiveRoom } from '@/interface';
 import areaModel from '@/model/area.model';
@@ -86,6 +87,16 @@ class UserLiveRoomService {
           model: liveRoomModel,
           attributes: {
             exclude: LIVE_ROOM_MODEL_EXCLUDE,
+            include: [
+              // 计算 user_live_views 表中 live_room_id = id 的唯一 user_id 数量
+              [
+                sequelize.literal(`(
+                          SELECT COUNT(DISTINCT views.user_id) FROM user_live_views AS views
+                          WHERE views.live_room_id = live_room.id
+                      )`),
+                'views_count',
+              ],
+            ],
           },
           include: [
             {

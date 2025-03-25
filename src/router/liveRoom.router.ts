@@ -10,6 +10,14 @@ liveRoomRouter.get('/bilibili', liveRoomController.getBilibili);
 
 liveRoomRouter.get('/list', liveRoomController.getList);
 
+liveRoomRouter.get('/livingList', liveRoomController.getLiveRooms);
+
+liveRoomRouter.get('/allLiveRooms', liveRoomController.getAllLiveRooms);
+
+liveRoomRouter.get('/userRank', liveRoomController.getUserRankingsForLiveRoom);
+
+liveRoomRouter.get('/notLiveList', liveRoomController.getNotLiveRooms);
+
 liveRoomRouter.get('/find/:id', liveRoomController.find);
 
 liveRoomRouter.put('/update_key', liveRoomController.updateKey);

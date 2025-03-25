@@ -37,7 +37,6 @@ class CategoryService {
   }: IList<ICategory>) {
     // 确保 id 是有效数字，避免 NaN 进入 SQL
     // id = isNaN(Number(id)) ? undefined : Number(id);
-    console.log(id, '-------');
 
     const { offset, limit } = handlePage({ nowPage, pageSize });
     const allWhere: any = deleteUseLessObjectKey({

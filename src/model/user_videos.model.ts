@@ -7,33 +7,40 @@ import {
   Model,
 } from 'sequelize';
 
-export interface IRecording {
+export interface IVideo {
   id?: number;
+  user_id?: number;
   live_room_id?: number;
   parent_category_id?: number;
   child_category_id?: number;
   title?: string;
+  cover?: string;
   url?: string;
   duration?: number;
+  desc?: string;
   created_at?: Date;
   updated_at?: Date;
   deleted_at?: Date;
 }
 
-interface LiveRoomRecordingModel
+interface UserVideosModel
   extends Model<
-      InferAttributes<LiveRoomRecordingModel>,
-      InferCreationAttributes<LiveRoomRecordingModel>
+      InferAttributes<UserVideosModel>,
+      InferCreationAttributes<UserVideosModel>
     >,
-    IRecording {}
+    IVideo {}
 
-const model = sequelize.define<LiveRoomRecordingModel>(
-  'live_room_recordings',
+const model = sequelize.define<UserVideosModel>(
+  'user_videos',
   {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
+    },
+    user_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
     live_room_id: {
       type: DataTypes.INTEGER,
@@ -48,6 +55,14 @@ const model = sequelize.define<LiveRoomRecordingModel>(
       allowNull: false,
     },
     title: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    desc: {
+      type: DataTypes.STRING(255),
+      allowNull: false,
+    },
+    cover: {
       type: DataTypes.STRING(255),
       allowNull: false,
     },

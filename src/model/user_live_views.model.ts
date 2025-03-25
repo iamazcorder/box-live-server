@@ -7,56 +7,46 @@ import {
   Model,
 } from 'sequelize';
 
-export interface IRecording {
+export interface ILiveView {
   id?: number;
+  user_id?: number;
   live_room_id?: number;
-  parent_category_id?: number;
-  child_category_id?: number;
-  title?: string;
-  url?: string;
   duration?: number;
+  watched_at?: Date;
   created_at?: Date;
   updated_at?: Date;
   deleted_at?: Date;
 }
 
-interface LiveRoomRecordingModel
+interface UserLiveViewsModel
   extends Model<
-      InferAttributes<LiveRoomRecordingModel>,
-      InferCreationAttributes<LiveRoomRecordingModel>
+      InferAttributes<UserLiveViewsModel>,
+      InferCreationAttributes<UserLiveViewsModel>
     >,
-    IRecording {}
+    ILiveView {}
 
-const model = sequelize.define<LiveRoomRecordingModel>(
-  'live_room_recordings',
+const model = sequelize.define<UserLiveViewsModel>(
+  'user_live_views',
   {
     id: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
     },
+    user_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
     live_room_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    parent_category_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    child_category_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    title: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-    },
-    url: {
-      type: DataTypes.STRING(255),
-      allowNull: false,
-    },
     duration: {
       type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    watched_at: {
+      type: DataTypes.DATE,
       allowNull: false,
     },
   },

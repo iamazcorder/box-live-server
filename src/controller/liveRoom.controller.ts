@@ -179,6 +179,36 @@ class LiveRoomController {
     await next();
   };
 
+  /** 获取正在直播的直播间列表 */
+  getLiveRooms = async (ctx: ParameterizedContext, next) => {
+    const params = ctx.request.query;
+    const result = await liveRoomService.getLiveRooms(params);
+    successHandler({ ctx, data: result });
+    await next();
+  };
+  /** 获取不在直播的直播间列表 */
+  getNotLiveRooms = async (ctx: ParameterizedContext, next) => {
+    const params = ctx.request.query;
+    const result = await liveRoomService.getNotLiveRooms(params);
+    successHandler({ ctx, data: result });
+    await next();
+  };
+
+  /** 获取根据直播状态排序的直播间列表 */
+  getAllLiveRooms = async (ctx: ParameterizedContext, next) => {
+    const params = ctx.request.query;
+    const result = await liveRoomService.getAllLiveRooms(params);
+    successHandler({ ctx, data: result });
+    await next();
+  };
+
+  getUserRankingsForLiveRoom = async (ctx: ParameterizedContext, next) => {
+    const params = ctx.request.query;
+    const result = await liveRoomService.getUserRankingsForLiveRoom(params);
+    successHandler({ ctx, data: result });
+    await next();
+  };
+
   getBilibili = async (ctx: ParameterizedContext, next) => {
     const roomId = initUser.user_bilibili.live_room.id || -1;
     const result = await this.common.find(roomId);
