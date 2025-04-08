@@ -29,6 +29,9 @@ const frontendWhiteList = [
   '/user/username_login', // 登录，这个接口是post的
   '/user/qrcode_login', // 登录，这个接口是post的
 
+  '/adminUser/login',
+  // '/adminUser/get_user_info',
+
   '/qq_user/login', // 登录，这个接口是post的
 
   '/wechat_user/login', // 登录，这个接口是post的

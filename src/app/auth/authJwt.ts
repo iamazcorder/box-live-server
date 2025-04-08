@@ -3,7 +3,9 @@ import jwt from 'jsonwebtoken';
 
 import { COMMON_ERROE_MSG, COMMON_HTTP_CODE } from '@/constant';
 import { JWT_SECRET } from '@/secret/secret';
+import adminUserService from '@/service/adminUser.service';
 import userService from '@/service/user.service';
+import { IAdminUser } from '@/types/IAdminUser';
 import { IUser, UserStatusEnum } from '@/types/IUser';
 import { judgeUserStatus } from '@/utils';
 
@@ -20,6 +22,7 @@ export const jwtVerify = (token: string) => {
     jwt.verify(token, JWT_SECRET, (err, decoded) => {
       // 判断非法/过期token
       if (err) {
+        console.log(err, 'error');
         let msg = err.message;
         if (err.message.indexOf('expired') !== -1) {
           msg = COMMON_ERROE_MSG.jwtExpired;
@@ -31,45 +34,93 @@ export const jwtVerify = (token: string) => {
         return;
       }
       async function main() {
-        try {
-          const userResult = await userService.findAndToken(
-            // @ts-ignore
-            decoded.userInfo.id
-          );
-          if (!userResult) {
-            // 这个用户已经被删除了
+        console.log(decoded, '[[[[[[[[[');
+        if (decoded?.userInfo) {
+          try {
+            const userResult = await userService.findAndToken(
+              // @ts-ignore
+              decoded.userInfo.id
+            );
+            if (!userResult) {
+              // 这个用户已经被删除了
+              resolve({
+                code: COMMON_HTTP_CODE.unauthorized,
+                msg: '该用户不存在！',
+              });
+              return;
+            }
+            if (userResult.token !== token) {
+              // 1.防止修改密码后，原本的token还能用
+              // 2.重新登录问题，重新登录会更新token（这个待优化，应该是异地重新登陆了才更新token）
+              resolve({
+                code: COMMON_HTTP_CODE.unauthorized,
+                msg: COMMON_ERROE_MSG.jwtExpired,
+              });
+              return;
+            }
+            const userStatusRes = judgeUserStatus(userResult.status!);
+            if (userStatusRes.status !== UserStatusEnum.normal) {
+              // 判断用户状态
+              resolve({
+                code: COMMON_HTTP_CODE.unauthorized,
+                errorCode: userStatusRes.errorCode,
+                msg: userStatusRes.msg,
+              });
+              return;
+            }
             resolve({
-              code: COMMON_HTTP_CODE.unauthorized,
-              msg: '该用户不存在！',
+              code: COMMON_HTTP_CODE.success,
+              msg: '验证token通过！',
+              userInfo: filterObj(userResult.get(), ['token']),
             });
-            return;
+          } catch (error: any) {
+            resolve({ code: COMMON_HTTP_CODE.paramsError, msg: error });
           }
-          if (userResult.token !== token) {
-            // 1.防止修改密码后，原本的token还能用
-            // 2.重新登录问题，重新登录会更新token（这个待优化，应该是异地重新登陆了才更新token）
+        }
+        if (decoded?.adminInfo) {
+          try {
+            const userResult = await adminUserService.findAndToken(
+              // @ts-ignore
+              decoded.adminInfo.id
+            );
+            if (!userResult) {
+              console.log('该用户不存在');
+              // 这个用户已经被删除了
+              resolve({
+                code: COMMON_HTTP_CODE.unauthorized,
+                msg: '该用户不存在！',
+              });
+              return;
+            }
+            if (userResult.token !== token) {
+              console.log('token不一样');
+              // 1.防止修改密码后，原本的token还能用
+              // 2.重新登录问题，重新登录会更新token（这个待优化，应该是异地重新登陆了才更新token）
+              resolve({
+                code: COMMON_HTTP_CODE.unauthorized,
+                msg: COMMON_ERROE_MSG.jwtExpired,
+              });
+              return;
+            }
+            // const userStatusRes = judgeUserStatus(userResult.status!);
+            // if (userStatusRes.status !== UserStatusEnum.normal) {
+            //   // 判断用户状态
+            //   resolve({
+            //     code: COMMON_HTTP_CODE.unauthorized,
+            //     errorCode: userStatusRes.errorCode,
+            //     msg: userStatusRes.msg,
+            //   });
+            //   return;
+            // }
+            console.log('验证token通过');
             resolve({
-              code: COMMON_HTTP_CODE.unauthorized,
-              msg: COMMON_ERROE_MSG.jwtExpired,
+              code: COMMON_HTTP_CODE.success,
+              msg: '验证token通过！',
+              userInfo: filterObj(userResult.get(), ['token']),
             });
-            return;
+          } catch (error: any) {
+            resolve({ code: COMMON_HTTP_CODE.paramsError, msg: error });
           }
-          const userStatusRes = judgeUserStatus(userResult.status!);
-          if (userStatusRes.status !== UserStatusEnum.normal) {
-            // 判断用户状态
-            resolve({
-              code: COMMON_HTTP_CODE.unauthorized,
-              errorCode: userStatusRes.errorCode,
-              msg: userStatusRes.msg,
-            });
-            return;
-          }
-          resolve({
-            code: COMMON_HTTP_CODE.success,
-            msg: '验证token通过！',
-            userInfo: filterObj(userResult.get(), ['token']),
-          });
-        } catch (error: any) {
-          resolve({ code: COMMON_HTTP_CODE.paramsError, msg: error });
         }
       }
       // 如果token正确，解密token获取用户id，根据id查数据库的token判断是否一致。
@@ -103,6 +154,22 @@ export const signJwt = (value: { userInfo: IUser; exp: number }): string => {
   };
   const res = jwt.sign(
     { userInfo, exp: Math.floor(Date.now() / 1000) + 60 * 60 * value.exp },
+    JWT_SECRET
+  );
+  return res;
+};
+
+export const signAdminJwt = (value: {
+  adminInfo: IAdminUser;
+  exp: number;
+}): string => {
+  const adminInfo = {
+    id: value.adminInfo.id,
+    username: value.adminInfo.username,
+    avatar: value.adminInfo.avatar,
+  };
+  const res = jwt.sign(
+    { adminInfo, exp: Math.floor(Date.now() / 1000) + 60 * 60 * value.exp },
     JWT_SECRET
   );
   return res;

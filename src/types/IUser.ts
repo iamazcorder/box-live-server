@@ -125,6 +125,9 @@ export interface IUser {
   token?: string;
   remark?: string;
 
+  is_host?: boolean;
+  id_number?: string;
+
   qq_users?: IQqUser[];
   wechat_users?: IWechatUser[];
   github_users?: IGithubUser[];
@@ -149,4 +152,15 @@ export interface IUser {
   background_image?: string; // 主页背景图URL
   gender?: 'male' | 'female' | 'other'; // 性别
   birth_date?: string; // 出生日期 (格式为YYYY-MM-DD)
+}
+
+export interface ILiveAnchorAudit {
+  id?: number;
+  user_id?: number;
+  id_number?: string;
+  real_name?: string;
+  status?: number;
+  reject_reason?: string;
+  audit_admin_id?: number;
+  audit_time?: Date;
 }

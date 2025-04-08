@@ -97,6 +97,17 @@ const model = sequelize.define<UserModel>(
       type: DataTypes.DATEONLY,
       allowNull: true,
     },
+    // 新增的字段
+    is_host: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+      comment: '是否为主播',
+    },
+    id_number: {
+      type: DataTypes.STRING(18),
+      allowNull: true,
+      comment: '身份证号',
+    },
   },
   {
     hooks: {
